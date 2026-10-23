@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "Si usa o adapta este material, cítelo de la siguiente forma."
+title: "VaR y ES del S&P 500: simulación histórica, backtesting y elicitabilidad conjunta (Fissler y Ziegel, 2016)"
+type: software
+authors:
+  - given-names: Joan
+    family-names: Robles
+repository-code: "https://github.com/Joan-Robles/fissler-ziegel-2016"
+license: CC-BY-4.0
+date-released: 2026-10-22
+keywords:
+  - value at risk
+  - expected shortfall
+  - elicitability
+  - backtesting
+  - scoring functions
+references:
+  - type: article
+    authors:
+      - family-names: Fissler
+        given-names: Tobias
+      - family-names: Ziegel
+        given-names: Johanna F.
+    title: "Higher order elicitability and Osband's principle"
+    journal: "The Annals of Statistics"
+    volume: 44
+    issue: 4
+    start: 1680
+    end: 1707
+    year: 2016

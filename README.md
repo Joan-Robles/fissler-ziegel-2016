@@ -32,3 +32,13 @@ jupyter nbconvert --to notebook --execute --inplace var_es_fissler_ziegel.ipynb
 En la primera ejecución el notebook descarga los precios con `yfinance` y los guarda en `data/spy_2010_2025.csv`; las ejecuciones siguientes leen ese archivo. Para forzar una descarga nueva, cambie `FORCE_DOWNLOAD = True` en la celda de configuración.
 
 Las salidas guardadas en el notebook corresponden a datos descargados el 22 de octubre de 2026. Una descarga posterior reproduce esos precios mientras Yahoo no recalcule los precios ajustados; si lo hace, las cifras pueden variar ligeramente.
+
+## Licencia y cita
+
+El contenido de este repositorio (código, texto y figuras) se distribuye bajo la licencia [Creative Commons Atribución 4.0 Internacional (CC BY 4.0)](LICENSE). Puede usarlo, modificarlo y redistribuirlo, incluso con fines comerciales, siempre que dé crédito al autor, enlace la licencia e indique si hizo cambios.
+
+Cita sugerida:
+
+> Robles, J. (2026). *VaR y ES del S&P 500: simulación histórica, backtesting y elicitabilidad conjunta (Fissler y Ziegel, 2016)* [Repositorio de GitHub]. https://github.com/Joan-Robles/fissler-ziegel-2016
+
+Los datos que descarga el notebook pertenecen a Yahoo Finance y no están cubiertos por esta licencia.
