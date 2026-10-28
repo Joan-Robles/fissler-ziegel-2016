@@ -10,28 +10,33 @@ El artículo muestra que, aunque el Expected Shortfall (ES) no es elicitable por
 
 | Archivo | Descripción |
 |---|---|
-| `var_es_fissler_ziegel.ipynb` | Notebook principal, ejecutado y con todas las salidas. |
+| `var_es_fissler_ziegel.ipynb` | Notebook ejecutado, con todas las salidas. Solo llama a los módulos. |
+| `var_es.py` | Cálculos: datos, VaR/ES, backtesting, score FZ0, Diebold-Mariano y verificaciones. |
+| `graficos.py` | Figuras del notebook. |
+| `tests/test_var_es.py` | Pruebas automáticas (pytest). |
 | `requirements.txt` | Paquetes y versiones con los que se ejecutó el notebook. |
 
-Los datos (precios diarios ajustados de SPY, 2010-01-04 a 2025-12-31) no se incluyen en el repositorio. El notebook los descarga de Yahoo Finance en la primera ejecución.
+El notebook sigue el orden del artículo:
 
-El notebook estima VaR y ES diarios de SPY con $\alpha = 0{,}05$ y $0{,}01$ (95 % y 99 %) mediante simulación histórica y un modelo normal, ambos con ventana móvil de 500 días. Evalúa los pronósticos fuera de muestra (2016–2025) de dos maneras:
+1. **Introducción y datos.** SPY diario 2010–2025, con 2016–2025 como muestra de evaluación.
+2. **Elicitabilidad de orden superior.** Definiciones; el VaR es 1-elicitable y el ES no (conjuntos de nivel no convexos).
+3. **Principio de Osband.** Verificación numérica de $
+abla ar S = h(x)ar V$.
+4. **Componentes elicitables: el VaR.** Simulación histórica y normal con ventana de 500 días; backtesting de Kupiec y Christoffersen.
+5. **Medidas de riesgo espectrales: el par (VaR, ES).** Corolario 5.5, score FZ0, M-estimación y ranking con Diebold-Mariano.
+6. **Discusión.** Tabla final, conclusiones y verificaciones independientes.
 
-1. Calibración absoluta del VaR: pruebas de Kupiec y Christoffersen, con p-valores asintóticos, exactos y de Monte Carlo.
-2. Ranking de modelos con el score FZ0, un miembro estrictamente consistente de la familia del Corolario 5.5, y la prueba de Diebold-Mariano.
-
-La sección 4 desarrolla la teoría con verificaciones numéricas: los conjuntos de nivel no convexos del ES, la descomposición de la prueba del Corolario 5.5, el principio de Osband y la simulación histórica como M-estimador del score FZ0.
+Los datos no se incluyen en el repositorio: el notebook los descarga de Yahoo Finance en la primera ejecución.
 
 ## Cómo ejecutarlo
 
 ```bash
 pip install -r requirements.txt
-jupyter nbconvert --to notebook --execute --inplace var_es_fissler_ziegel.ipynb
+python -m nbconvert --to notebook --execute --inplace var_es_fissler_ziegel.ipynb
+python -m pytest tests
 ```
 
-En la primera ejecución el notebook descarga los precios con `yfinance` y los guarda en `data/spy_2010_2025.csv`; las ejecuciones siguientes leen ese archivo. Para forzar una descarga nueva, cambie `FORCE_DOWNLOAD = True` en la celda de configuración.
-
-Las salidas guardadas en el notebook corresponden a datos descargados el 22 de octubre de 2026. Una descarga posterior reproduce esos precios mientras Yahoo no recalcule los precios ajustados; si lo hace, las cifras pueden variar ligeramente.
+En la primera ejecución se descargan los precios con `yfinance` y se guardan en `data/spy_2010_2025.csv`; las ejecuciones siguientes leen ese archivo (`ve.load_prices(force=True)` fuerza una descarga nueva). Las salidas guardadas corresponden a datos descargados el 22 de octubre de 2026; si Yahoo recalcula los precios ajustados, las cifras pueden variar ligeramente.
 
 ## Licencia y cita
 

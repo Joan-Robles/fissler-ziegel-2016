@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 venv/
 .ipynb_checkpoints/
+.pytest_cache/
 
 # Datos descargados de Yahoo Finance (el notebook los regenera)
 data/
