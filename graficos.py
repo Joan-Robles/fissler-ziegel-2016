@@ -44,11 +44,15 @@ def distribucion_perdidas(L):
     fig, ax = plt.subplots(1, 2, figsize=(12, 4))
     ax[0].hist(L, bins=120, density=True, color=C_L, alpha=0.6, label="Pérdidas observadas")
     ax[0].plot(grid, stats.norm.pdf(grid, mu, sd), color=C_N, lw=1.5, label="Normal con la misma media y desv.")
+    for a, ls in ((0.05, "--"), (0.01, "-")):
+        ax[0].axvline(np.quantile(L, 1 - a, method="inverted_cdf"), color=C_L, ls=ls, lw=1,
+                      label=f"cuantil {ve.nivel(a)} empírico")
+        ax[0].axvline(mu + sd * stats.norm.ppf(1 - a), color=C_N, ls=ls, lw=1, label=f"cuantil {ve.nivel(a)} normal")
     ax[0].set_yscale("log")
     ax[0].set_ylim(1e-4, 1)
     ax[0].set_xlabel("L_t (%)")
     ax[0].set_title("Densidad de las pérdidas (escala log)")
-    ax[0].legend(fontsize=8)
+    ax[0].legend(fontsize=7, loc="upper left")
     stats.probplot(L, dist="norm", plot=ax[1])
     ax[1].get_lines()[0].set(markersize=2, color=C_L)
     ax[1].get_lines()[1].set(color=C_N)
@@ -266,5 +270,71 @@ def robustez(rob):
         ax.set_yticks(y, d["caso"])
         ax.set_xlabel("estadístico DM (< -1.96: HS mejor al 5 %)")
         ax.set_title(f"Robustez del ranking, {lab}")
+    fig.tight_layout()
+    return fig
+
+
+def backtesting(bt):
+    """Tasa de excepciones frente a alpha (Kupiec) y pi01 frente a pi11 (independencia)."""
+    fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+    labels = [f"{m}\n{n}" for m, n in bt.index]
+    x = np.arange(len(bt))
+    colors = [COLOR[m] for m, _ in bt.index]
+    ax[0].bar(x, 100 * bt["tasa"].astype(float), color=colors)
+    exp = [100 * (1 - float(n.rstrip("%")) / 100) for _, n in bt.index]
+    ax[0].scatter(x, exp, marker="_", s=900, color="k", zorder=3, label="α esperado")
+    for xi, (t, p) in enumerate(zip(bt["tasa"], bt["p Kupiec"])):
+        ax[0].text(xi, 100 * t + 0.1, f"p = {p:.3f}", ha="center", fontsize=8)
+    ax[0].set_xticks(x, labels)
+    ax[0].set_ylabel("tasa de excepciones (%)")
+    ax[0].set_title("Cobertura incondicional (Kupiec)")
+    ax[0].set_ylim(0, 1.3 * 100 * bt["tasa"].astype(float).max())
+    ax[0].legend(fontsize=8, loc="upper center")
+    w = 0.38
+    ax[1].bar(x - w / 2, 100 * bt["pi01"].astype(float), width=w, color=C_L, label="π01: tras un día sin excepción")
+    ax[1].bar(x + w / 2, 100 * bt["pi11"].astype(float), width=w, color="crimson", label="π11: tras una excepción")
+    for xi, (v, p) in enumerate(zip(bt["pi11"], bt["p independencia"])):
+        ax[1].text(xi + w / 2, 100 * v + 0.3, f"p = {p:.4f}", ha="center", fontsize=8)
+    ax[1].set_xticks(x, labels)
+    ax[1].set_ylabel("probabilidad de excepción (%)")
+    ax[1].set_title("Independencia (Christoffersen)")
+    ax[1].set_ylim(0, 1.35 * 100 * bt["pi11"].astype(float).max())
+    ax[1].legend(fontsize=8, loc="upper left", ncol=2)
+    fig.tight_layout()
+    return fig
+
+
+def ranking(score_tab):
+    fig, ax = plt.subplots(figsize=(7, 4))
+    x = np.arange(len(score_tab))
+    w = 0.38
+    ax.bar(x - w / 2, score_tab["FZ0 HS"], width=w, color=C_HS, label="HS")
+    ax.bar(x + w / 2, score_tab["FZ0 Normal"], width=w, color=C_N, label="Normal")
+    for xi, (_, r) in enumerate(score_tab.iterrows()):
+        top = max(r["FZ0 HS"], r["FZ0 Normal"])
+        ax.text(xi, top + 0.05, f"DM = {r['DM']:.2f}\np = {r['p bilateral']:.3f}", ha="center", fontsize=9)
+    ax.set_xticks(x, score_tab.index)
+    ax.set_ylabel("FZ0 promedio (menor es mejor)")
+    ax.set_ylim(0, 1.25 * score_tab[["FZ0 HS", "FZ0 Normal"]].to_numpy().max())
+    ax.set_title("Score FZ0 promedio fuera de muestra")
+    ax.legend(fontsize=8, loc="upper left")
+    fig.tight_layout()
+    return fig
+
+
+def severidad(er):
+    fig, ax = plt.subplots(figsize=(9, 4))
+    x = np.arange(len(er))
+    w = 0.38
+    ax.bar(x - w / 2, er["Pérdida media en excepción"], width=w, color=C_L, label="pérdida media en excepción")
+    ax.bar(x + w / 2, er["ES medio reportado"], width=w, color=[COLOR[m] for m, _ in er.index],
+           label="ES reportado esos días (color del modelo)")
+    for xi, (_, r) in enumerate(er.iterrows()):
+        ax.text(xi, r["Pérdida media en excepción"] + 0.08, f"×{r['Razón']:.2f}", ha="center", fontsize=9)
+    ax.set_xticks(x, [f"{m}\n{n}" for m, n in er.index])
+    ax.set_ylabel("% del valor")
+    ax.set_title("Severidad de la cola: pérdida realizada frente al ES")
+    ax.set_ylim(0, 1.3 * er["Pérdida media en excepción"].max())
+    ax.legend(fontsize=8, loc="upper left", ncol=2)
     fig.tight_layout()
     return fig
